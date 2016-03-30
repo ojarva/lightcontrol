@@ -6,12 +6,13 @@ Usage:
     lights.py run <ip> [--debug] [--redis-host=<hostname>] [--redis-port=<port>]
 """
 
-import redis
+import docopt
 import json
 import ledcontroller
-import docopt
 import logging
 import os
+import programs
+import redis
 
 
 class LightControlCommand(object):
@@ -46,6 +47,7 @@ class LightControlService(object):
         ch = logging.StreamHandler()
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
+        self.programs = programs.LightPrograms(**kwargs)
         self.set_group_names()
 
     def set_group_names(self):
@@ -186,12 +188,12 @@ class LightControlService(object):
                     self.logger.debug("Skipping automatic %s for %s as group is marked as manually controlled.", command.command, command.group)
                     return
 
-        if command.command in ("set_color", "set_brightness", "on", "night"):
+        if command.command in ("set_color", "set_brightness", "on", "night", "auto-triggered"):
             if command.source == "manual":
                 self.logger.debug("Setting group %s to manual control.", command.group)
                 self.set_auto_mode(command.group, False)
             elif command.source == "trigger":
-                if self.is_night(datetime.datetime.now()):
+                if self.programs.is_night(datetime.datetime.now()):
                     if self.disabled_at_night(command.group):
                         self.logger.debug("Skipping %s for group %s - disabled during night")
                         return
