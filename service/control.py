@@ -167,6 +167,9 @@ class LightControlService(object):
     def set_off(self, status, group_id, **kwargs):
         self.run_operation(group_id, self.led.off, False, "on", kwargs.get("force", False))
 
+    def disabled_at_night(self, group_id):
+        return self.get_redis("lightcontrol-group-%s-disabled-night" % group_id, False) not in (False, "False", "false")
+
     def process_command(self, data):
         if data["group"] == 0:
             for group in range(1, 5):
@@ -183,9 +186,15 @@ class LightControlService(object):
                     self.logger.debug("Skipping automatic %s for %s as group is marked as manually controlled.", command.command, command.group)
                     return
 
-        if command.command in ("set_color", "set_brightness", "on", "night") and command.source == "manual":
-            self.logger.debug("Setting group %s to manual control.", command.group)
-            self.set_auto_mode(command.group, False)
+        if command.command in ("set_color", "set_brightness", "on", "night"):
+            if command.source == "manual":
+                self.logger.debug("Setting group %s to manual control.", command.group)
+                self.set_auto_mode(command.group, False)
+            elif command.source == "trigger":
+                if self.is_night(datetime.datetime.now()):
+                    if self.disabled_at_night(command.group):
+                        self.logger.debug("Skipping %s for group %s - disabled during night")
+                        return
 
         if command.command == "sync":
             self.sync(command.group)
