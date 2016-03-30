@@ -7,6 +7,7 @@ Usage:
 """
 
 import docopt
+import datetime
 import json
 import ledcontroller
 import logging
@@ -195,7 +196,7 @@ class LightControlService(object):
             elif command.source == "trigger":
                 if self.programs.is_night(datetime.datetime.now()):
                     if self.disabled_at_night(command.group):
-                        self.logger.debug("Skipping %s for group %s - disabled during night")
+                        self.logger.debug("Skipping %s for group %s - disabled during night", command.command, command.group)
                         return
 
         if command.command == "sync":
