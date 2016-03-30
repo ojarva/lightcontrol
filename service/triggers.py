@@ -8,6 +8,7 @@ Usage:
 import redis
 import docopt
 import os
+import json
 
 
 class LightTriggers(object):
