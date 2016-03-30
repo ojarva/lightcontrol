@@ -39,7 +39,7 @@ class LightTimers(object):
 
     def off_timer(self, group_id):
         self.logger.info("off: %s", group_id)
-        self.redis.publish("lightcontrol-control-pubsub", json.dumps({"group": group_id, "command": "off", "source": "auto"}))
+        self.redis.publish("lightcontrol-control-pubsub", json.dumps({"group": group_id, "command": "off", "source": "trigger"}))
 
     def start_timer(self, group_id, length, **kwargs):
         if group_id in self.timers_length:
