@@ -95,7 +95,7 @@ class LightControlService(object):
         if not group_on:
             self.logger.debug("Not syncing group %s with program settings, as it is off", group_id)
             return
-        user_override = self.get_redis("lightcontrol-state-{group_id}-user-override", False) not in ("False", False)
+        user_override = self.get_redis("lightcontrol-state-{group_id}-user-override".format(group_id=group_id), False) not in ("False", False)
         if user_override:
             self.logger.debug("Not syncing group %s with program settings, as it is overridden by the user", group_id)
             return
@@ -156,7 +156,7 @@ class LightControlService(object):
         self.run_operation(group_id, self.led.set_color, color, "color", kwargs.get("force", False))
 
     def set_brightness(self, brightness, group_id, **kwargs):
-        color = self.redis.get("lightcontrol-state-{group_id}-color")
+        color = self.redis.get("lightcontrol-state-{group_id}-color".format(group_id=group_id))
         if color is None:
             self.logger.debug("No color specified for group %s - falling back to white", group_id)
             color = "white"
