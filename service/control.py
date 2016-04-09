@@ -80,7 +80,10 @@ class LightControlService(object):
                 brightness_key = "white_brightness"
             else:
                 brightness_key = "rgb_brightness"
-            brightness = self.get_redis("lightcontrol-state-{group_id}-{brightness_key}".format(group_id=group_id, brightness_key=brightness_key), 100)
+            brightness = self.redis.get("lightcontrol-state-{group_id}-{brightness_key}".format(group_id=group_id, brightness_key=brightness_key))
+            if brightness is None:
+                self.logger.debug("No brightness specified for group %s (%s), fallback to 100", group_id, color)
+                brightness = 100
             brightness = int(brightness)
             self.set_brightness(brightness, group_id, force=True)
         else:
@@ -153,7 +156,10 @@ class LightControlService(object):
         self.run_operation(group_id, self.led.set_color, color, "color", kwargs.get("force", False))
 
     def set_brightness(self, brightness, group_id, **kwargs):
-        color = self.get_redis("lightcontrol-state-{group_id}-color", "white")
+        color = self.redis.get("lightcontrol-state-{group_id}-color")
+        if color is None:
+            self.logger.debug("No color specified for group %s - falling back to white", group_id)
+            color = "white"
         if color == "white":
             key = "white_brightness"
         else:
