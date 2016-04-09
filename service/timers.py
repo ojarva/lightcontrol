@@ -42,6 +42,9 @@ class LightTimers(object):
         self.redis.publish("lightcontrol-control-pubsub", json.dumps({"group": group_id, "command": "off", "source": "trigger"}))
 
     def start_timer(self, group_id, length, **kwargs):
+        self.logger.info("auto-trigger: %s", group_id)
+        self.redis.publish("lightcontrol-control-pubsub", json.dumps({"group": group_id, "command": "auto-triggered", "source": "trigger"}))
+
         if group_id in self.timers_length:
             current_timer_expire_time = self.timers_length[group_id]
             new_expire_time = datetime.datetime.now() + datetime.timedelta(seconds=length)
@@ -52,8 +55,6 @@ class LightTimers(object):
         if self.timers.get(group_id):
             self.logger.debug("Cancelling old timer for %s", group_id)
             self.timers.get(group_id).cancel()
-        self.logger.info("auto-trigger: %s", group_id)
-        self.redis.publish("lightcontrol-control-pubsub", json.dumps({"group": group_id, "command": "auto-triggered", "source": "trigger"}))
         timer = threading.Timer(length, self.off_timer, [group_id])
         timer.start()
         self.logger.info("Started a new timer for group %s, length %ss", group_id, length)
