@@ -32,30 +32,20 @@ class LightTriggers(object):
         DOOR = 4
 
         triggers = set()
-        if trigger == "toilet-door":
+        if trigger in ("balcony-door-inner", "balcony-door-outer", "small-window", "bed", "bed-shelf", "balcony-door-pir"):
+            triggers.add(BED)
+        if trigger in ("bathroom-door", "outer-door", "inner-door", "corridor-pir"):
             triggers.add(DOOR)
-        if trigger == "front-door":
-            triggers.add(DOOR)
+        if trigger in ("table-above-kitchen", "table-center", "table-acceleration-sensor"):
+            triggers.add(TABLE)
+        if trigger in ("kitchen-ceiling",):
+            triggers.add(KITCHEN)
+
         if trigger == "kitchen-room":
             triggers.update([KITCHEN, TABLE])
         if trigger == "hall-kitchen":
             triggers.update([KITCHEN, DOOR])
-        if trigger == "table-above-kitchen":
-            triggers.add(TABLE)
-        if trigger == "kitchen-ceiling":
-            triggers.add(KITCHEN)
-        if trigger == "hall-ceiling":
-            triggers.add(DOOR)
-        if trigger == "table-center":
-            triggers.add(TABLE)
-        if trigger == "table-acceleration-sensor":
-            triggers.add(TABLE)
-        if trigger == "bed":
-            triggers.add(BED)
-        if trigger == "bed-shelf":
-            triggers.add(BED)
-        if trigger == "balcony-door-pir":
-            triggers.add(BED)
+
         for group_id in triggers:
             self.redis.publish("lightcontrol-timer-pubsub", json.dumps({"group": group_id}))
 
