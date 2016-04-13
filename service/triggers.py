@@ -34,7 +34,7 @@ class LightTriggers(object):
         triggers = set()
         if trigger in ("balcony-door-inner", "balcony-door-outer", "small-window", "bed", "bed-shelf", "balcony-door-pir"):
             triggers.add(BED)
-        if trigger in ("bathroom-door", "outer-door", "inner-door", "corridor-pir"):
+        if trigger in ("bathroom-door", "outer-door", "inner-door", "corridor-pir", "bathroom-ceiling"):
             triggers.add(DOOR)
         if trigger in ("table-above-kitchen", "table-center", "table-acceleration-sensor"):
             triggers.add(TABLE)
