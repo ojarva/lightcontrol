@@ -20,6 +20,16 @@ class LightTriggers(object):
             redis_args["port"] = kwargs["redis_port"]
         self.redis = redis.StrictRedis(**redis_args)
 
+        self.logger = logging.getLogger("lightcontrol-triggers")
+        if kwargs.get("debug"):
+            self.logger.setLevel(logging.DEBUG)
+        else:
+            self.logger.setLevel(logging.INFO)
+        format_string = "%(asctime)s - {controller_ip} - %(levelname)s - %(message)s".format(controller_ip=controller_ip)
+        formatter = logging.Formatter(format_string)
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+
     def process_command(self, command):
         if "key" not in command:
             self.logger.error("No key specified: %s", command)
@@ -47,6 +57,7 @@ class LightTriggers(object):
             triggers.update([KITCHEN, DOOR])
 
         for group_id in triggers:
+            self.logger.debug("Updating group %s", group_id)
             self.redis.publish("lightcontrol-timer-pubsub", json.dumps({"group": group_id}))
 
     def run(self):
@@ -55,6 +66,7 @@ class LightTriggers(object):
         for message in pubsub.listen():
             try:
                 command = json.loads(message["data"])
+                self.logger.debug("Received %s", command)
             except (ValueError, TypeError):
                 self.logger.warning("Received invalid command from pubsub: %s", message)
                 continue
