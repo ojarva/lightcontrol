@@ -9,6 +9,7 @@ import redis
 import docopt
 import os
 import json
+import logging
 
 
 class LightTriggers(object):
@@ -25,10 +26,11 @@ class LightTriggers(object):
             self.logger.setLevel(logging.DEBUG)
         else:
             self.logger.setLevel(logging.INFO)
-        format_string = "%(asctime)s - {controller_ip} - %(levelname)s - %(message)s".format(controller_ip=controller_ip)
+        format_string = "%(asctime)s - {controller_ip} - %(levelname)s - %(message)s"
         formatter = logging.Formatter(format_string)
         ch = logging.StreamHandler()
         ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
 
     def process_command(self, command):
         if "key" not in command:
